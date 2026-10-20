@@ -1,0 +1,17 @@
+{
+  "claim_id": "claim_e",
+  "employee": "E. Hartono",
+  "submitted_on": "2025-03-20",
+  "currency": "IDR",
+  "receipt": "receipts/r0005.jpg",
+  "purpose": "Team dinner",
+  "items": [
+    {"name": "SAMGYOPSAL", "quantity": 2, "amount": 194000},
+    {"name": "SUL LUNG TANG", "quantity": 1, "amount": 75000},
+    {"name": "MAKOLI", "quantity": 1, "amount": 100000}
+  ],
+  "tax_claimed": 38745,
+  "discount_claimed": 0,
+  "claimed_total": 500000,
+  "notes": "Paid 500,000 cash; claiming the full amount handed over, including change."
+}

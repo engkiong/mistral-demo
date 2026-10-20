@@ -1,0 +1,16 @@
+{
+  "claim_id": "claim_b",
+  "employee": "B. Santoso",
+  "submitted_on": "2025-03-15",
+  "currency": "IDR",
+  "receipt": "receipts/r0002.jpg",
+  "purpose": "Client lunch",
+  "items": [
+    {"name": "PKT AYAM", "quantity": 1, "amount": 33000},
+    {"name": "GULAI OTAK", "quantity": 1, "amount": 23000}
+  ],
+  "tax_claimed": 11200,
+  "discount_claimed": 0,
+  "claimed_total": 67200,
+  "notes": "Tax added on the itemised lines and again on the summary line."
+}

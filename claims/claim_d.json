@@ -1,0 +1,17 @@
+{
+  "claim_id": "claim_d",
+  "employee": "D. Pratama",
+  "submitted_on": "2025-03-18",
+  "currency": "IDR",
+  "receipt": "receipts/r0004.jpg",
+  "purpose": null,
+  "items": [
+    {"name": "LUNCH BOX 3P SET W/RED BAG", "quantity": 8, "amount": 1555200},
+    {"name": "RICE CASE 7L W/CUP", "quantity": 5, "amount": 780000},
+    {"name": "LUNCH BOX 3P SET W/BLACK BAG", "quantity": 4, "amount": 777600}
+  ],
+  "tax_claimed": 0,
+  "discount_claimed": 0,
+  "claimed_total": 3112000,
+  "notes": "Receipt has no merchant name; business purpose not stated."
+}

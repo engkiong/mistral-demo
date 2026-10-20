@@ -1,0 +1,32 @@
+{
+  "claim_a": {
+    "expected_decision": "approve",
+    "acceptable_decisions": ["approve"],
+    "expected_reimbursable_amount": 93500,
+    "expected_reason_keywords": ["match"]
+  },
+  "claim_b": {
+    "expected_decision": "partial",
+    "acceptable_decisions": ["partial", "reject"],
+    "expected_reimbursable_amount": 61600,
+    "expected_reason_keywords": ["tax", "twice"]
+  },
+  "claim_c": {
+    "expected_decision": "partial",
+    "acceptable_decisions": ["partial"],
+    "expected_reimbursable_amount": 174600,
+    "expected_reason_keywords": ["discount"]
+  },
+  "claim_d": {
+    "expected_decision": "escalate",
+    "acceptable_decisions": ["escalate"],
+    "expected_reimbursable_amount": 0,
+    "expected_reason_keywords": ["missing", "merchant"]
+  },
+  "claim_e": {
+    "expected_decision": "partial",
+    "acceptable_decisions": ["partial", "reject"],
+    "expected_reimbursable_amount": 310695,
+    "expected_reason_keywords": ["alcohol", "change"]
+  }
+}
