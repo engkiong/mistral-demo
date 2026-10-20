@@ -77,6 +77,12 @@ same workspace you are looking at. The worker needs a `DEPLOYMENT_NAME`; it
 defaults to `claims-reconciliation`. Set the variable in your environment if
 several people share a workspace.
 
+**Retry demo:** `extract_activity` fails once, on the first attempt for claim_c's
+receipt (`r0003.jpg`), with a simulated OCR outage. The retry policy reruns it
+and it succeeds, so the claim_c execution shows one failed and one succeeded
+attempt and ends green. The failure flag lives in the worker process: restart
+`worker.py` before each run to make it fail again.
+
 ### Receipts
 
 `receipts/*.txt` were generated once with `mistral-ocr-latest` and committed.
