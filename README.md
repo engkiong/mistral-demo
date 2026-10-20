@@ -40,7 +40,7 @@ More files appear as the segments are built (`common.py`, `naive_chat.py`,
 | claim_a | r0001    | Clean                                                 | approve                |
 | claim_b | r0002    | Tax double-counted                                    | partial (or reject)    |
 | claim_c | r0003    | Discount claimed at the pre-discount price            | partial                |
-| claim_d | r0004    | Ambiguous: no merchant, no stated purpose             | escalate               |
+| claim_d | r0004    | Ambiguous: no purpose, items mismatch receipt           | escalate               |
 | claim_e | r0005    | Alcohol (non-reimbursable) plus change claimed        | partial (or reject)    |
 
 `claims/expected_decisions.json` holds, per claim, the expected decision, the

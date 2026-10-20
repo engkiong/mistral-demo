@@ -21,7 +21,7 @@
     "expected_decision": "escalate",
     "acceptable_decisions": ["escalate"],
     "expected_reimbursable_amount": 0,
-    "expected_reason_keywords": ["missing", "merchant"]
+    "expected_reason_keywords": ["purpose", "mismatch"]
   },
   "claim_e": {
     "expected_decision": "partial",
