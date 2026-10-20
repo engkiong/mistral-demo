@@ -46,6 +46,19 @@ More files appear as the segments are built (`common.py`, `naive_chat.py`,
 `claims/expected_decisions.json` holds, per claim, the expected decision, the
 expected reimbursable amount, and expected reason keywords. Amounts are in IDR.
 
+### The one-shot baseline
+
+```bash
+python naive_chat.py --claim claims/claim_a.json
+python naive_chat.py --claim claims/claim_b.json   # run it a few times
+```
+
+One prompt, one sampled completion, raw text out. Don't expect a single
+dramatic failure: `mistral-small-latest` often does the arithmetic right. What
+you will see is that the answer, the decision and even the output format change
+from run to run (approve / partial / reject / escalate). At scale, inconsistent
+is wrong, and there is nothing to parse, test or retry.
+
 ### Receipts
 
 `receipts/*.txt` were generated once with `mistral-ocr-latest` and committed.
