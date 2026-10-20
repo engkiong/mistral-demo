@@ -6,7 +6,7 @@ deterministic rules, and a retried, observable Mistral Workflow.
 
 ## Setup
 
-Requires Python 3.11+.
+Requires Python 3.12+ (the Workflows SDK needs it).
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -58,6 +58,24 @@ dramatic failure: `mistral-small-latest` often does the arithmetic right. What
 you will see is that the answer, the decision and even the output format change
 from run to run (approve / partial / reject / escalate). At scale, inconsistent
 is wrong, and there is nothing to parse, test or retry.
+
+### The durable workflow
+
+`workflow.py` runs the same pipeline as a Mistral Workflow: `extract_activity`
+(one OCR call with the receipt schema) then `reconcile_activity` (rules R1-R5),
+each with a 2-minute start-to-close timeout and up to 3 attempts. The
+orchestrator is Mistral-hosted; the worker runs on your machine.
+
+```bash
+python worker.py &              # registers the workflow + activities and polls for work
+python run_workflow.py --all    # one execution per claim; prints IDs, waits for results
+```
+
+Watch the executions in Mistral Studio: Workflows > `claim_reconciliation_workflow`
+> Executions (https://console.mistral.ai/build/workflows). Use an API key from the
+same workspace you are looking at. The worker needs a `DEPLOYMENT_NAME`; it
+defaults to `claims-reconciliation`. Set the variable in your environment if
+several people share a workspace.
 
 ### Receipts
 
