@@ -74,6 +74,17 @@ def check_escalation(claim: Claim, receipt: dict) -> list[str]:
     return reasons
 
 
+def check_tax_once(claim: Claim, receipt: dict) -> tuple[list[str], float]:
+    """R2: tax counted once. Returns (reasons, amount of excess the tax overclaim explains)."""
+    receipt_tax = receipt["tax"] or 0
+    if claim["tax_claimed"] > receipt_tax and not close(claim["tax_claimed"], receipt_tax):
+        twice = receipt_tax > 0 and close(claim["tax_claimed"], 2 * receipt_tax)
+        how = "counted twice" if twice else "overstated"
+        reason = f"R2: tax {how}: claimed {fmt(claim['tax_claimed'])}, receipt shows {fmt(receipt_tax)}"
+        return [reason], claim["tax_claimed"] - receipt_tax
+    return [], 0.0
+
+
 def reconcile(claim: Claim, receipt: dict) -> dict:
     """Apply R1-R5 and return {decision, reasons, reimbursable_amount}."""
     escalation = check_escalation(claim, receipt)
@@ -85,16 +96,9 @@ def reconcile(claim: Claim, receipt: dict) -> dict:
     reasons: list[str] = []
     explained_excess = 0.0
 
-    # R2: tax counted once
-    receipt_tax = receipt["tax"] or 0
-    if claim["tax_claimed"] > receipt_tax and not close(claim["tax_claimed"], receipt_tax):
-        extra = claim["tax_claimed"] - receipt_tax
-        twice = receipt_tax > 0 and close(claim["tax_claimed"], 2 * receipt_tax)
-        how = "counted twice" if twice else "overstated"
-        reasons.append(
-            f"R2: tax {how}: claimed {fmt(claim['tax_claimed'])}, receipt shows {fmt(receipt_tax)}"
-        )
-        explained_excess += extra
+    tax_reasons, tax_excess = check_tax_once(claim, receipt)
+    reasons += tax_reasons
+    explained_excess += tax_excess
 
     # R3: discounts at the post-discount price
     discount = sum(d["amount"] for d in receipt["discounts"])
