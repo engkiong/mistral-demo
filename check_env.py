@@ -1,6 +1,7 @@
 """Verify the workshop environment: API key, OCR endpoint, chat endpoint."""
 import base64
 import os
+import socket
 import sys
 from pathlib import Path
 
@@ -10,13 +11,27 @@ from mistralai.client import Mistral
 OCR_MODEL = "mistral-ocr-latest"
 CHAT_MODEL = "mistral-small-latest"
 SAMPLE_RECEIPT = Path(__file__).parent / "receipts" / "r0001.jpg"
+API_HOST = "api.mistral.ai"
+CONNECT_TIMEOUT_S = 5
+REQUEST_TIMEOUT_MS = 30_000
+
+
+def check_reachable() -> None:
+    """Fail fast with a clear message instead of hanging when the API can't be reached."""
+    try:
+        socket.create_connection((API_HOST, 443), timeout=CONNECT_TIMEOUT_S).close()
+    except OSError as exc:
+        raise RuntimeError(
+            f"cannot connect to {API_HOST}:443 ({exc}). Check your network/VPN and retry; "
+            "if other sites load, the API may be having an incident."
+        ) from exc
 
 
 def check_api_key() -> Mistral:
     key = os.environ.get("MISTRAL_API_KEY")
     if not key:
         raise RuntimeError("MISTRAL_API_KEY is not set (see .env.example)")
-    return Mistral(api_key=key)
+    return Mistral(api_key=key, timeout_ms=REQUEST_TIMEOUT_MS)
 
 
 def check_ocr(client: Mistral) -> None:
@@ -47,6 +62,12 @@ def main() -> int:
         print("OK    MISTRAL_API_KEY present")
     except RuntimeError as exc:
         print(f"FAIL  MISTRAL_API_KEY present: {exc}")
+        return 1
+    try:
+        check_reachable()
+        print(f"OK    {API_HOST} reachable")
+    except RuntimeError as exc:
+        print(f"FAIL  {API_HOST} reachable: {exc}")
         return 1
     for label, check in [
         ("OCR endpoint responds", check_ocr),

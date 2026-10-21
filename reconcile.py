@@ -8,6 +8,9 @@ from difflib import SequenceMatcher
 from common import ROOT, Claim, load_claim, resolve
 from extract import extract_receipt
 
+EXTRACTION_FIELDS = (
+    "merchant", "items", "subtotal", "tax", "discounts", "total_paid", "payment_method", "change",
+)
 ABS_TOLERANCE = 0.02
 REL_TOLERANCE = 0.01
 NAME_MATCH_RATIO = 0.6
@@ -147,7 +150,21 @@ def reconcile(claim: Claim, receipt: dict) -> dict:
 
 def reconcile_claim(path: str) -> tuple[Claim, dict]:
     claim = load_claim(path)
-    return claim, reconcile(claim, extract_receipt(claim["receipt"]))
+    extraction = extract_receipt(claim["receipt"])
+    result = reconcile(claim, extraction)
+    missing = [field for field in EXTRACTION_FIELDS if field not in extraction]
+    if missing:
+        result["warnings"] = [f"extraction is missing fields {missing} (see the TODO in extract.py)"]
+    return claim, result
+
+
+def reconcile_claim_safely(path: str) -> tuple[Claim, dict]:
+    """Like reconcile_claim, but a crashing claim becomes a FAIL line instead of aborting the run."""
+    try:
+        return reconcile_claim(path)
+    except Exception as exc:
+        reasons = [f"crashed: {type(exc).__name__}: {exc} (a rule may be an unimplemented TODO)"]
+        return load_claim(path), {"decision": "error", "reasons": reasons, "reimbursable_amount": 0}
 
 
 def check_against_expected(claim_id: str, result: dict, expected: dict) -> list[str]:
@@ -170,7 +187,7 @@ def run_all() -> int:
     paths = sorted(str(p.relative_to(ROOT)) for p in (ROOT / "claims").glob("claim_*.json"))
     expected = json.loads(resolve("claims/expected_decisions.json").read_text())
     with ThreadPoolExecutor() as pool:
-        outcomes = list(pool.map(reconcile_claim, paths))
+        outcomes = list(pool.map(reconcile_claim_safely, paths))
 
     print(f"{'claim':<9}{'decision':<10}{'amount':>12}  {'result':<6} reasons")
     passed = 0
@@ -184,6 +201,8 @@ def run_all() -> int:
         )
         for problem in problems:
             print(f"{'':<39}-> {problem}")
+        for warning in result.get("warnings", []):
+            print(f"{'':<39}!! {warning}")
     print(f"\n{passed}/{len(outcomes)} PASS")
     return 0 if passed == len(outcomes) else 1
 

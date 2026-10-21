@@ -11,6 +11,7 @@ from mistralai.client import Mistral
 
 ROOT = Path(__file__).parent
 DECISION_LABELS = ("approve", "partial", "reject", "escalate")
+REQUEST_TIMEOUT_MS = 60_000  # fail instead of hanging if the API is unreachable
 
 
 class ClaimItem(TypedDict):
@@ -43,7 +44,7 @@ def get_client() -> Mistral:
     key = os.environ.get("MISTRAL_API_KEY")
     if not key:
         raise RuntimeError("MISTRAL_API_KEY is not set (see .env.example)")
-    return Mistral(api_key=key)
+    return Mistral(api_key=key, timeout_ms=REQUEST_TIMEOUT_MS)
 
 
 def load_claim(path: str | Path) -> Claim:
