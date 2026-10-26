@@ -5,6 +5,7 @@ import sys
 
 from dotenv import load_dotenv
 from mistralai.client import Mistral
+from mistralai.client.models import ImageURLChunk, TextChunk, UserMessage
 
 load_dotenv()
 
@@ -16,17 +17,17 @@ response = client.chat.complete(
     model="mistral-small-latest",
     response_format={"type": "json_object"},
     messages=[
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": "Describe this receipt as a JSON object: "
-                    "merchant, items (name, quantity, amount), tax, total.",
-                },
-                {"type": "image_url", "image_url": f"data:image/jpeg;base64,{image}"},
-            ],
-        }
+        UserMessage(
+            content=[
+                TextChunk(
+                    text="Describe this receipt as a JSON object: "
+                    "merchant, items (name, quantity, amount), tax, total."
+                ),
+                ImageURLChunk(image_url=f"data:image/jpeg;base64,{image}"),
+            ]
+        )
     ],
 )
-print(response.choices[0].message.content)
+message = response.choices[0].message
+assert message is not None
+print(message.content)

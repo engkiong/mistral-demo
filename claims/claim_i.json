@@ -1,0 +1,17 @@
+{
+  "claim_id": "claim_i",
+  "employee": "I. Wibowo",
+  "submitted_on": "2025-03-25",
+  "currency": "IDR",
+  "receipt": "receipts/r0016.jpg",
+  "items": [
+    {"name": "CATS", "quantity": 10, "amount": 28000},
+    {"name": "FRENCH BAGUETTES", "quantity": 200, "amount": 17000},
+    {"name": "PHO TAI CHIN (R)", "quantity": 1, "amount": 63000},
+    {"name": "TEA", "quantity": 1, "amount": 11000}
+  ],
+  "tax_claimed": 12733,
+  "discount_claimed": 0,
+  "claimed_total": 140063,
+  "notes": "Paid by credit card."
+}

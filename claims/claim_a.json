@@ -1,0 +1,15 @@
+{
+  "claim_id": "claim_a",
+  "employee": "A. Wijaya",
+  "submitted_on": "2025-03-14",
+  "currency": "IDR",
+  "receipt": "receipts/r0001.jpg",
+  "items": [
+    {"name": "Ash Chick Sambal Matah", "quantity": 5, "amount": 75000},
+    {"name": "Jamur Goreng", "quantity": 2, "amount": 10000}
+  ],
+  "tax_claimed": 8500,
+  "discount_claimed": 0,
+  "claimed_total": 93500,
+  "notes": "Paid cash."
+}

@@ -1,0 +1,14 @@
+{
+  "claim_id": "claim_g",
+  "employee": "G. Pratama",
+  "submitted_on": "2025-03-22",
+  "currency": "IDR",
+  "receipt": "receipts/r0014.jpg",
+  "items": [
+    {"name": "CLIENT DINNER x40pax", "quantity": 1, "amount": 40000}
+  ],
+  "tax_claimed": 0,
+  "discount_claimed": 0,
+  "claimed_total": 40000,
+  "notes": "Paid 100,000 cash."
+}

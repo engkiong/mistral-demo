@@ -1,0 +1,16 @@
+{
+  "claim_id": "claim_f",
+  "employee": "F. Santoso",
+  "submitted_on": "2025-03-21",
+  "currency": "IDR",
+  "receipt": "receipts/r0013.jpg",
+  "items": [
+    {"name": "LE CHONK (BIG SOUP)", "quantity": 1, "amount": 60000},
+    {"name": "MINISTRAL (KIDS PORTION)", "quantity": 1, "amount": 8000},
+    {"name": "1x H100 GPU HOUR", "quantity": 1, "amount": 150000}
+  ],
+  "tax_claimed": 0,
+  "discount_claimed": 0,
+  "claimed_total": 218000,
+  "notes": "Paid cash."
+}
