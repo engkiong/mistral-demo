@@ -4,7 +4,6 @@
   "submitted_on": "2025-03-15",
   "currency": "IDR",
   "receipt": "receipts/r0002.jpg",
-  "purpose": "Client lunch",
   "items": [
     {"name": "PKT AYAM", "quantity": 1, "amount": 33000},
     {"name": "GULAI OTAK", "quantity": 1, "amount": 23000}

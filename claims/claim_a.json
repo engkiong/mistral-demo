@@ -4,7 +4,6 @@
   "submitted_on": "2025-03-14",
   "currency": "IDR",
   "receipt": "receipts/r0001.jpg",
-  "purpose": "Team lunch",
   "items": [
     {"name": "Ash Chick Sambal Matah", "quantity": 5, "amount": 75000},
     {"name": "Jamur Goreng", "quantity": 2, "amount": 10000}

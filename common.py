@@ -26,7 +26,6 @@ class Claim(TypedDict):
     submitted_on: str
     currency: str
     receipt: str  # repo-relative path to the receipt .jpg
-    purpose: str | None
     items: list[ClaimItem]
     tax_claimed: int
     discount_claimed: int

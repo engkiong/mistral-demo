@@ -21,7 +21,7 @@
     "expected_decision": "escalate",
     "acceptable_decisions": ["escalate"],
     "expected_reimbursable_amount": 0,
-    "expected_reason_keywords": ["purpose", "mismatch"]
+    "expected_reason_keywords": ["mismatch"]
   },
   "claim_e": {
     "expected_decision": "partial",

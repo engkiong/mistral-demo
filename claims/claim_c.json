@@ -4,7 +4,6 @@
   "submitted_on": "2025-03-17",
   "currency": "IDR",
   "receipt": "receipts/r0003.jpg",
-  "purpose": "Working coffee with partner",
   "items": [
     {"name": "ICE BLACKCOFFE", "quantity": 2, "amount": 82000},
     {"name": "AVOCADO COFFEE", "quantity": 1, "amount": 61000},

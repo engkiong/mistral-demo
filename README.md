@@ -51,7 +51,7 @@ More files appear as the segments are built (`common.py`, `naive_chat.py`,
 | claim_a | r0001   | Clean                                            | approve             |
 | claim_b | r0002   | Tax double-counted                               | partial (or reject) |
 | claim_c | r0003   | Discount claimed at the pre-discount price       | partial             |
-| claim_d | r0004   | Ambiguous: no purpose, items mismatch receipt    | escalate            |
+| claim_d | r0004   | Ambiguous: items mismatch receipt                | escalate            |
 | claim_e | r0005   | Alcohol (non-reimbursable) plus change claimed   | partial (or reject) |
 
 `claims/expected_decisions.json` holds, per claim, the expected decision
@@ -61,20 +61,20 @@ expected reimbursable amount, and expected reason keywords. Amounts are in IDR.
 ### Claim format
 
 Each `claims/claim_*.json` has: `claim_id`, `employee`, `submitted_on`, `currency`,
-`receipt` (repo-relative path to the `.jpg`), `purpose` (may be `null`), `items`
-(a list of `{name, quantity, amount}`), `tax_claimed`, `discount_claimed`,
-`claimed_total`, and free-text `notes`. The `Claim` type in `common.py` is the
-reference. The notes are deliberately neutral ("Paid cash."): they must never
-give the answer away.
+`receipt` (repo-relative path to the `.jpg`), `items` (a list of
+`{name, quantity, amount}`), `tax_claimed`, `discount_claimed`, `claimed_total`,
+and free-text `notes`. The `Claim` type in `common.py` is the reference. Every
+claim is for a business meal, so a claim has no purpose field. The notes are
+deliberately neutral ("Paid cash."): they must never give the answer away.
 
 How each claim is decided, by deterministic rules in `reconcile.py`:
 
 - **claim_a** approves: every check passes.
 - **claim_b** claims 11,200 tax where the receipt shows 5,600 (rule R2).
 - **claim_c** claims the pre-discount total where the receipt shows a 19,400 discount (R3).
-- **claim_d** escalates (R4) because the claim has no `purpose` and its item amounts
-  (post-discount) don't match the receipt's line items. Missing merchant is *not* a
-  trigger: CORD receipts rarely print one, so extraction returns `merchant: null`.
+- **claim_d** escalates (R4) because its item amounts (post-discount) don't match
+  the receipt's line items. Missing merchant is *not* a trigger: CORD receipts
+  rarely print one, so extraction returns `merchant: null`.
 - **claim_e** includes an alcohol item (MAKOLI) and claims 500,000 against a
   426,195 receipt; the excess is change and is not claimable (R5).
 

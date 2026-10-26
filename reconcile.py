@@ -57,8 +57,6 @@ def match_items(claim_items: list[dict], receipt_items: list[dict]) -> list[tupl
 def check_escalation(claim: Claim, receipt: dict) -> list[str]:
     """R4: critical fields missing, or an item-level mismatch beyond tolerance."""
     reasons = []
-    if not (claim.get("purpose") or "").strip():
-        reasons.append("R4: business purpose is missing from the claim")
     if receipt["total_paid"] is None:
         reasons.append("R4: receipt total is missing")
     if not receipt["items"]:
