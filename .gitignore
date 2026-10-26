@@ -1,0 +1,8 @@
+.venv/
+.env
+.envrc
+.direnv/
+.DS_Store
+__pycache__/
+# dev-time CORD v2 ground truth, never a runtime dependency
+.dev/
