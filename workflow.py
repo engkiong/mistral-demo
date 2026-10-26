@@ -23,10 +23,10 @@ SEEDED_FAILURE_RECEIPT = "receipts/r0003.jpg"
 _seeded_failure_fired = False
 
 
-# TODO: add a retry policy. Set start_to_close_timeout=timedelta(minutes=2) and
-#       retry_policy_max_attempts=3 (compare with reconcile_activity). With a single attempt, the
-#       seeded failure below makes the claim_c execution fail instead of retrying.
-@workflows.activity(retry_policy_max_attempts=1)
+@workflows.activity(
+    start_to_close_timeout=timedelta(minutes=2),
+    retry_policy_max_attempts=3,
+)
 async def extract_activity(receipt_path: str) -> dict:
     """OCR the receipt image and extract typed fields in one call."""
     global _seeded_failure_fired

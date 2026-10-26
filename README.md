@@ -132,13 +132,13 @@ The rules: R1 the totals match. R2 tax is counted once. R3 discounts use the pos
 price. R4 escalate to a human when the receipt and claim do not match. R5 change and
 alcohol are not claimable.
 
-## Phase 3: a durable workflow (you are here: start)
+## Phase 3: a durable workflow (you are here: end)
 
 `workflow.py` runs the same pipeline as a Mistral Workflow: `extract_activity` (one OCR
 call), then `reconcile_activity` (rules R1-R5). The orchestrator is hosted by Mistral.
 The worker runs on your machine. Setup: run `pip install -r requirements.txt` again.
 
-Fill in this gap:
+This gap is filled in:
 
 | File          | TODO                                                                |
 | ------------- | ------------------------------------------------------------------- |
@@ -152,7 +152,7 @@ python worker.py &                                    # registers the workflow, 
 python run_workflow.py --claim claims/claim_c.json    # one execution, waits for the result
 ```
 
-**You are done when** the claim_c execution ends **COMPLETED**, and the worker log shows
+**Check it:** the claim_c execution ends **COMPLETED**, and the worker log shows
 `attempt=1` failing, then `attempt=2`. Before the fix it ends **FAILED**.
 
 - The failure flag lives in the worker process. Restart the worker before each run.
