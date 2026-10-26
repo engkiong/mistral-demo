@@ -12,6 +12,21 @@ pip install -r requirements.txt
 cp .env.example .env    # put your Mistral API key in .env
 ```
 
+Already use [uv](https://docs.astral.sh/uv/)? Use it instead of `venv` and `pip`:
+
+```bash
+uv venv && source .venv/bin/activate
+uv pip install -r requirements.txt
+cp .env.example .env    # put your Mistral API key in .env
+```
+
+After this, every `python ...` command below works the same. Or skip the venv and let uv
+make a throwaway environment for each run:
+
+```bash
+uv run --with-requirements requirements.txt check_key.py
+```
+
 ## Scripts
 
 ```bash
