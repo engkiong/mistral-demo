@@ -20,3 +20,18 @@ python describe_receipt.py receipts/r0001.jpg   # receipt image -> JSON
 ```
 
 `receipts/` has three receipt images to try.
+
+## Next: the workshop
+
+The workshop has four phases. Each phase has a start branch (with gaps to fill in)
+and an end branch (the gaps filled in):
+
+| Phase | You build                              | Start branch     | End branch     |
+| ----- | -------------------------------------- | ---------------- | -------------- |
+| 1     | One-shot chat on an expense claim      | `phase-1-start`  | `phase-1-end`  |
+| 2     | Typed extraction and rules             | `phase-2-start`  | `phase-2-end`  |
+| 3     | A durable workflow with retries        | `phase-3-start`  | `phase-3-end`  |
+| 4     | A model judge and its evaluation       | `phase-4-start`  | `phase-4-end`  |
+
+Begin with `git checkout phase-1-start`. To skip ahead, check out the `end` branch of the
+phase before. The full solution is on the `solution` branch.
