@@ -101,7 +101,7 @@ The decision and the format change from run to run (approve, partial, reject, es
 `mistral-medium-latest` often gets the arithmetic right. The problem is that the answer
 is not stable, and there is nothing to parse, test or retry. Phase 2 fixes that.
 
-## Phase 2: typed extraction and rules (you are here: end)
+## Phase 2: typed extraction and rules (done)
 
 Two ideas: the model only *reads* the receipt into typed fields, and plain code
 *decides*. Setup: run `pip install -r requirements.txt` again.
@@ -131,3 +131,35 @@ python reconcile.py --all                        # extraction + rules over claim
 The rules: R1 the totals match. R2 tax is counted once. R3 discounts use the post-discount
 price. R4 escalate to a human when the receipt and claim do not match. R5 change and
 alcohol are not claimable.
+
+## Phase 3: a durable workflow (you are here: start)
+
+`workflow.py` runs the same pipeline as a Mistral Workflow: `extract_activity` (one OCR
+call), then `reconcile_activity` (rules R1-R5). The orchestrator is hosted by Mistral.
+The worker runs on your machine. Setup: run `pip install -r requirements.txt` again.
+
+Fill in this gap:
+
+| File          | TODO                                                                |
+| ------------- | ------------------------------------------------------------------- |
+| `workflow.py` | give `extract_activity` its retry policy (2 min timeout, 3 attempts) |
+
+`extract_activity` fails once on claim_c's receipt (`r0003.jpg`), with a simulated OCR
+outage. This is on purpose. With one attempt, the claim fails. With a retry policy, it recovers.
+
+```bash
+python worker.py &                                    # registers the workflow, polls for work
+python run_workflow.py --claim claims/claim_c.json    # one execution, waits for the result
+```
+
+**You are done when** the claim_c execution ends **COMPLETED**, and the worker log shows
+`attempt=1` failing, then `attempt=2`. Before the fix it ends **FAILED**.
+
+- The failure flag lives in the worker process. Restart the worker before each run.
+- The worker needs a `DEPLOYMENT_NAME`. It defaults to `claims-reconciliation`. Set the
+  variable in your environment if several people share a workspace.
+- Stop the worker by its PID (`kill %1`), not with `pkill -f`: that can hit other people's workers.
+- Watch the runs in Mistral Studio: Workflows > `claim_reconciliation_workflow` > Executions
+  (https://console.mistral.ai/build/workflows). Use a key from the same workspace.
+  Studio does not mark the failed attempt. The worker terminal does.
+- Manual step: confirm you can sign in to your Mistral Studio workspace.
