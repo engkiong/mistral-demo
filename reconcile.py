@@ -60,23 +60,33 @@ def match_items(
 
 def check_escalation(claim: Claim, receipt: dict) -> list[str]:
     """R4: critical fields missing, or an item-level mismatch beyond tolerance."""
-    reasons: list[str] = []
-    # TODO (R4): append one reason per problem; any reason makes reconcile() escalate.
-    #   - the receipt total (total_paid) is None       -> "R4: receipt total is missing"
-    #   - receipt or claim has no line items           -> "R4: ... no line items"
-    #   - an item-level mismatch beyond tolerance: use match_items(claim["items"], receipt["items"]),
-    #     which pairs each claim item with a receipt item (or None). Compare amounts with close()
-    #     and use "R4: item mismatch: ..." in the reason text.
+    reasons = []
+    if receipt["total_paid"] is None:
+        reasons.append("R4: receipt total is missing")
+    if not receipt["items"]:
+        reasons.append("R4: receipt has no readable line items")
+    elif not claim["items"]:
+        reasons.append("R4: claim has no line items")
+    else:
+        for claimed, found in match_items(claim["items"], receipt["items"]):
+            if found is None:
+                reasons.append(f"R4: item mismatch: '{claimed['name']}' not found on receipt")
+            elif found["amount"] is not None and not close(claimed["amount"], found["amount"]):
+                reasons.append(
+                    f"R4: item mismatch: '{claimed['name']}' claimed {fmt(claimed['amount'])}, "
+                    f"receipt shows {fmt(found['amount'])}"
+                )
     return reasons
 
 
 def check_tax_once(claim: Claim, receipt: dict) -> tuple[list[str], float]:
     """R2: tax counted once. Returns (reasons, amount of excess the tax overclaim explains)."""
-    # TODO (R2): compare claim["tax_claimed"] with the receipt's tax (None means 0), using close().
-    #   If the claim is higher beyond tolerance, return one reason and the excess amount:
-    #     - "R2: tax counted twice: claimed X, receipt shows Y" when the claim is ~2x the receipt tax
-    #     - "R2: tax overstated: claimed X, receipt shows Y" otherwise
-    #   Format amounts with fmt(). Otherwise return ([], 0.0).
+    receipt_tax = receipt["tax"] or 0
+    if claim["tax_claimed"] > receipt_tax and not close(claim["tax_claimed"], receipt_tax):
+        twice = receipt_tax > 0 and close(claim["tax_claimed"], 2 * receipt_tax)
+        how = "counted twice" if twice else "overstated"
+        reason = f"R2: tax {how}: claimed {fmt(claim['tax_claimed'])}, receipt shows {fmt(receipt_tax)}"
+        return [reason], claim["tax_claimed"] - receipt_tax
     return [], 0.0
 
 

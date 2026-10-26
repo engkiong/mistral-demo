@@ -101,12 +101,12 @@ The decision and the format change from run to run (approve, partial, reject, es
 `mistral-medium-latest` often gets the arithmetic right. The problem is that the answer
 is not stable, and there is nothing to parse, test or retry. Phase 2 fixes that.
 
-## Phase 2: typed extraction and rules (you are here: start)
+## Phase 2: typed extraction and rules (you are here: end)
 
 Two ideas: the model only *reads* the receipt into typed fields, and plain code
 *decides*. Setup: run `pip install -r requirements.txt` again.
 
-Fill in these gaps (search for `TODO`):
+These gaps are filled in:
 
 | File           | TODO                                                                  |
 | -------------- | --------------------------------------------------------------------- |
@@ -118,7 +118,7 @@ python extract.py --receipt receipts/r0001.jpg   # one OCR call, typed JSON out
 python reconcile.py --all                        # extraction + rules over claims a to e
 ```
 
-**You are done when:**
+**Check it:**
 
 1. `extract.py --receipt receipts/r0001.jpg` prints `"payment_method": "cash"` and
    `"change": 6500`. Until then, `reconcile.py --all` prints a `!!` warning under each claim.

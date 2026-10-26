@@ -41,9 +41,10 @@ class Receipt(BaseModel):
         description="Final amount due after tax and discounts. A second, larger 'Total'/'Cash' "
         f"line followed by a change line is the cash tendered, not this. {AMOUNTS}"
     )
-    # TODO: add `payment_method: str | None`. It is "cash" only when cash tendered or change
-    #       is printed, otherwise whatever the receipt says (e.g. "credit card").
-    # TODO: add `change: float | None`, the cash returned to the customer. Reuse AMOUNTS.
+    payment_method: str | None = Field(
+        description="'cash' only when cash tendered or change is printed, else what is printed."
+    )
+    change: float | None = Field(description=f"Cash returned to the customer. {AMOUNTS}")
 
 
 def extract_receipt(path: str) -> dict:
