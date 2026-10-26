@@ -132,7 +132,7 @@ The rules: R1 the totals match. R2 tax is counted once. R3 discounts use the pos
 price. R4 escalate to a human when the receipt and claim do not match. R5 change and
 alcohol are not claimable.
 
-## Phase 3: a durable workflow (you are here: end)
+## Phase 3: a durable workflow (done)
 
 `workflow.py` runs the same pipeline as a Mistral Workflow: `extract_activity` (one OCR
 call), then `reconcile_activity` (rules R1-R5). The orchestrator is hosted by Mistral.
@@ -163,3 +163,39 @@ python run_workflow.py --claim claims/claim_c.json    # one execution, waits for
   (https://console.mistral.ai/build/workflows). Use a key from the same workspace.
   Studio does not mark the failed attempt. The worker terminal does.
 - Manual step: confirm you can sign in to your Mistral Studio workspace.
+
+## Phase 4: a model judge and its evaluation (you are here: start)
+
+R6 is the one rule a model decides: it flags items that are not food or drink, and prices
+that are implausible for what was bought. The judge is in `anomaly.py`. It now runs in
+`reconcile.py` and in the workflow (`anomaly_activity`). Setup: run `pip install -r requirements.txt`
+again.
+
+Fill in this gap:
+
+| File         | TODO                                                                           |
+| ------------ | ------------------------------------------------------------------------------ |
+| `anomaly.py` | write `INSTRUCTIONS`: what is an anomaly, and what is not (other rules handle it) |
+
+`evaluate.py` runs the judge on the committed OCR text of every claim. It compares each verdict
+with `expected_anomaly` in `claims/expected_decisions.json`, and prints precision, recall, F1
+and a confusion matrix (positive label: `anomaly`). Nothing is uploaded.
+
+```bash
+python evaluate.py                                # the judge on its own
+python reconcile.py --all                         # the whole rule set, now with R6
+python evaluate.py --reasoning-effort none        # try other settings
+python evaluate.py --model mistral-large-4
+```
+
+**You are done when** `evaluate.py` catches all five anomalies and flags none of the four
+clean claims (precision and recall both near 1.00). The starter prompt scores about precision
+0.71: it flags the clean receipt and the alcohol claim.
+
+Then run `reconcile.py --all`. It should print **9/9 PASS** or close to it. R6 is a model, so
+it is noisy: on a live run it sometimes flags a clean claim (claim_a or claim_c), and that claim
+then FAILs. Run each setting more than once before you compare. That noise is the lesson:
+a model can judge, but the decision stays in rules you can test.
+
+Five claims are anomalies: claim_f to claim_i, and claim_d (a CORD receipt for reusable lunch
+boxes). R4 runs before R6, so claim_d is escalated, with the anomaly in its reasons.
