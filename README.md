@@ -37,6 +37,11 @@ uv pip install -r requirements.txt
 cp .env.example .env    # put your Mistral API key in .env
 ```
 
+Prefer to install nothing on your laptop? Use a GitHub Codespace: on the repo page click
+**Code > Codespaces > Create codespace on main**. It has Python 3.12 and the requirements
+installed. Put your key in `.env`, or add it as a Codespaces secret named `MISTRAL_API_KEY`
+(Settings > Codespaces > Secrets, shared with this repo). A secret wins over `.env`.
+
 ## Scripts
 
 ```bash
