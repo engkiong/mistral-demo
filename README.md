@@ -36,27 +36,34 @@ it also drops organisation-level settings such as the proxy.
 ## Layout
 
 ```
-receipts/   12 CORD v2 receipt images (naver-clova-ix/cord-v2, test split),
+receipts/   r0001-r0012: CORD v2 receipt images (naver-clova-ix/cord-v2, test split)
+            r0013-r0016: generated receipts with planted anomalies
             each with a committed OCR-generated .txt next to it
-claims/     5 staged claims + expected_decisions.json
+claims/     9 staged claims + expected_decisions.json
 ```
 
 More files appear as the segments are built (`common.py`, `naive_chat.py`,
-`extract.py`, `reconcile.py`, `workflow.py`, `worker.py`, `run_workflow.py`).
+`extract.py`, `reconcile.py`, `anomaly.py`, `workflow.py`, `worker.py`,
+`run_workflow.py`, `evaluate.py`).
 
 ### Staged claims
 
-| Claim   | Receipt | Scenario                                         | Expected            |
-| ------- | ------- | ------------------------------------------------ | ------------------- |
-| claim_a | r0001   | Clean                                            | approve             |
-| claim_b | r0002   | Tax double-counted                               | partial (or reject) |
-| claim_c | r0003   | Discount claimed at the pre-discount price       | partial             |
-| claim_d | r0004   | Ambiguous: items mismatch receipt                | escalate            |
-| claim_e | r0005   | Alcohol (non-reimbursable) plus change claimed   | partial (or reject) |
+| Claim   | Receipt | Scenario                                         | Expected             |
+| ------- | ------- | ------------------------------------------------ | -------------------- |
+| claim_a | r0001   | Clean                                            | approve              |
+| claim_b | r0002   | Tax double-counted                               | partial (or reject)  |
+| claim_c | r0003   | Discount claimed at the pre-discount price       | partial              |
+| claim_d | r0004   | Ambiguous: items mismatch receipt                | escalate             |
+| claim_e | r0005   | Alcohol (non-reimbursable) plus change claimed   | partial (or reject)  |
+| claim_f | r0013   | Anomaly: GPU hours and a "Devstral sprint"       | reject (or escalate) |
+| claim_g | r0014   | Anomaly: dinner for 40 people for 40,000         | reject               |
+| claim_h | r0015   | Anomaly: wedding ring and PlayStation 5          | reject               |
+| claim_i | r0016   | Anomaly: 10 cats, 200 baguettes for 17,000       | reject               |
 
 `claims/expected_decisions.json` holds, per claim, the expected decision
 (`expected_decision`, plus `acceptable_decisions` where two are fine), the
-expected reimbursable amount, and expected reason keywords. Amounts are in IDR.
+expected reimbursable amount, expected reason keywords, and whether the claim
+is an anomaly (`expected_anomaly`). Amounts are in IDR.
 
 ### Claim format
 
@@ -74,9 +81,14 @@ How each claim is decided, by deterministic rules in `reconcile.py`:
 - **claim_c** claims the pre-discount total where the receipt shows a 19,400 discount (R3).
 - **claim_d** escalates (R4) because its item amounts (post-discount) don't match
   the receipt's line items. Missing merchant is *not* a trigger: CORD receipts
-  rarely print one, so extraction returns `merchant: null`.
+  rarely print one, so extraction returns `merchant: null`. Its receipt is also an
+  anomaly (R6: reusable lunch boxes are not food), but R4 runs first.
 - **claim_e** includes an alcohol item (MAKOLI) and claims 500,000 against a
   426,195 receipt; the excess is change and is not claimable (R5).
+- **claim_f to claim_i** are rejected (R6): a chat model reads the receipt text and
+  flags items that are not food or drink, or prices that are implausible for what was
+  bought. R6 is the one rule a model decides. R4 runs first, so a claim that needs
+  human review anyway is escalated, with the anomaly in its reasons.
 
 ### The one-shot baseline
 
@@ -95,7 +107,7 @@ is wrong, and there is nothing to parse, test or retry.
 
 ```bash
 python extract.py --receipt receipts/r0001.jpg   # one OCR call, typed JSON out
-python reconcile.py --all                        # extraction + rules over 5 claims, 5/5 PASS
+python reconcile.py --all                        # extraction + rules over 9 claims, 9/9 PASS
 ```
 
 `reconcile.py --all` prints a table with PASS/FAIL per claim. A claim that crashes
@@ -105,8 +117,9 @@ fields you will see a `!!` warning under the claim.
 ### The durable workflow
 
 `workflow.py` runs the same pipeline as a Mistral Workflow: `extract_activity`
-(one OCR call with the receipt schema) then `reconcile_activity` (rules R1-R5),
-each with a 2-minute start-to-close timeout and up to 3 attempts. The
+(one OCR call with the receipt schema), `anomaly_activity` (one chat call, the
+input to R6), then `reconcile_activity` (rules R1-R6), each with a 2-minute
+start-to-close timeout and up to 3 attempts. The
 orchestrator is Mistral-hosted; the worker runs on your machine.
 
 ```bash
@@ -140,7 +153,26 @@ What you can and can't see:
   run to make it fail again. A second `run_workflow.py --all` against the same
   worker will not fail.
 
+### Evaluating the anomaly judge
+
+R6 is the one rule a model decides, so it gets its own evaluation. `evaluate.py`
+runs the judge in `anomaly.py` on every claim's committed OCR text and compares its
+verdict with `expected_anomaly` in `claims/expected_decisions.json`, using
+`mistralai-evaluations` (local run, nothing is uploaded).
+
+```bash
+python evaluate.py                                # default: mistral-medium-3-5, reasoning effort high
+python evaluate.py --reasoning-effort none        # faster, but can miss the 40-guest dinner
+python evaluate.py --model mistral-large-4        # slower, and can flag the clean receipt r0001
+```
+
+It prints the verdict and reasons per claim, then precision, recall, F1 and the
+confusion matrix (positive label: `anomaly`). Model output varies from run to run,
+so run each setting more than once before you compare. Five claims are labelled
+anomalies: claim_f to claim_i, and claim_d (a CORD receipt for reusable lunch boxes).
+
 ### Receipts
 
 `receipts/*.txt` were generated once with `mistral-ocr-latest` and committed.
-The naive chat demo reads the `.txt`; `extract.py` does live OCR on the `.jpg`.
+The naive chat demo and `evaluate.py` read the `.txt`; `extract.py` does live OCR
+on the `.jpg`.

@@ -54,14 +54,18 @@ def extract_receipt(path: str) -> dict:
         document_annotation_format=response_format_from_pydantic_model(Receipt),
     )
     # model_validate_json raises if any required field is missing or mistyped
-    return Receipt.model_validate_json(resp.document_annotation).model_dump()
+    fields = Receipt.model_validate_json(resp.document_annotation).model_dump()
+    # Keep the raw text too: the anomaly check (R6) needs details the typed fields drop, e.g. "x40pax"
+    return {**fields, "ocr_text": "\n\n".join(page.markdown for page in resp.pages)}
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--receipt", required=True, help="path to a receipt .jpg")
     args = parser.parse_args()
-    print(Receipt.model_validate(extract_receipt(args.receipt)).model_dump_json(indent=2))
+    extraction = extract_receipt(args.receipt)
+    print(Receipt.model_validate(extraction).model_dump_json(indent=2))
+    print(f"\nOCR text:\n{extraction['ocr_text']}")
 
 
 if __name__ == "__main__":

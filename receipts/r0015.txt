@@ -1,0 +1,11 @@
+|  WEDDING RING | 1 | 550,000  |
+| --- | --- | --- |
+|  PLAYSTATION 5 | 1 | 450,000  |
+
+|  Sub Total | 1,000,000  |
+| --- | --- |
+|  Service | 50,000  |
+|  VAT | 105,000  |
+|  Discount | 0  |
+
+**TOTAL** 1,155,000

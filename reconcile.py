@@ -5,6 +5,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from difflib import SequenceMatcher
 
+from anomaly import detect_anomaly
 from common import ROOT, Claim, load_claim, resolve
 from extract import extract_receipt
 
@@ -86,11 +87,22 @@ def check_tax_once(claim: Claim, receipt: dict) -> tuple[list[str], float]:
     return [], 0.0
 
 
-def reconcile(claim: Claim, receipt: dict) -> dict:
-    """Apply R1-R5 and return {decision, reasons, reimbursable_amount}."""
+def check_anomaly(anomaly: dict | None) -> list[str]:
+    """R6: the model judged an item or price implausible for a business meal."""
+    if not anomaly or not anomaly["is_anomalous"]:
+        return []
+    return [f"R6: anomaly: {reason}" for reason in anomaly["reasons"]] or ["R6: anomaly flagged"]
+
+
+def reconcile(claim: Claim, receipt: dict, anomaly: dict | None = None) -> dict:
+    """Apply R1-R6 and return {decision, reasons, reimbursable_amount}."""
+    # R4 before R6: a claim a human must review anyway is escalated, with the anomaly noted
     escalation = check_escalation(claim, receipt)
+    anomalies = check_anomaly(anomaly)
     if escalation:
-        return {"decision": "escalate", "reasons": escalation, "reimbursable_amount": 0}
+        return {"decision": "escalate", "reasons": escalation + anomalies, "reimbursable_amount": 0}
+    if anomalies:
+        return {"decision": "reject", "reasons": anomalies, "reimbursable_amount": 0}
 
     claimed = claim["claimed_total"]
     total = receipt["total_paid"]
@@ -149,7 +161,8 @@ def reconcile(claim: Claim, receipt: dict) -> dict:
 def reconcile_claim(path: str) -> tuple[Claim, dict]:
     claim = load_claim(path)
     extraction = extract_receipt(claim["receipt"])
-    result = reconcile(claim, extraction)
+    anomaly = detect_anomaly(claim["currency"], extraction["ocr_text"])
+    result = reconcile(claim, extraction, anomaly)
     missing = [field for field in EXTRACTION_FIELDS if field not in extraction]
     if missing:
         result["warnings"] = [f"extraction is missing fields {missing} (see the TODO in extract.py)"]

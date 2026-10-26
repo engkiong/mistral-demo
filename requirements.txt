@@ -1,4 +1,5 @@
 mistralai==2.10.1
+mistralai-evaluations==0.8.4
 mistralai-workflows==3.16.0
 pydantic==2.14.1
 python-dotenv==1.2.4

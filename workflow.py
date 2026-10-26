@@ -8,6 +8,7 @@ from temporalio import activity as temporal_activity
 
 # Our own modules pull in the Mistral client; load them outside the determinism sandbox.
 with workflows.workflow.unsafe.imports_passed_through():
+    from anomaly import detect_anomaly
     from extract import extract_receipt
     from reconcile import reconcile
 
@@ -41,9 +42,18 @@ async def extract_activity(receipt_path: str) -> dict:
     start_to_close_timeout=timedelta(minutes=2),
     retry_policy_max_attempts=3,
 )
-async def reconcile_activity(claim: dict, extraction: dict) -> dict:
-    """Apply the deterministic rules R1-R5."""
-    return reconcile(claim, extraction)
+async def anomaly_activity(claim: dict, extraction: dict) -> dict:
+    """Ask the chat model whether any item or price is implausible (input to R6)."""
+    return await asyncio.to_thread(detect_anomaly, claim["currency"], extraction["ocr_text"])
+
+
+@workflows.activity(
+    start_to_close_timeout=timedelta(minutes=2),
+    retry_policy_max_attempts=3,
+)
+async def reconcile_activity(claim: dict, extraction: dict, anomaly: dict) -> dict:
+    """Apply the deterministic rules R1-R6."""
+    return reconcile(claim, extraction, anomaly)
 
 
 @workflows.workflow.define(name=WORKFLOW_NAME)
@@ -51,5 +61,6 @@ class ClaimReconciliationWorkflow:
     @workflows.workflow.entrypoint
     async def run(self, claim: dict) -> dict:
         extraction = await extract_activity(claim["receipt"])
-        result = await reconcile_activity(claim, extraction)
+        anomaly = await anomaly_activity(claim, extraction)
+        result = await reconcile_activity(claim, extraction, anomaly)
         return {"claim_id": claim["claim_id"], **result}

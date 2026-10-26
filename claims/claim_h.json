@@ -1,0 +1,14 @@
+{
+  "claim_id": "claim_h",
+  "employee": "H. Kusuma",
+  "submitted_on": "2025-03-24",
+  "currency": "IDR",
+  "receipt": "receipts/r0015.jpg",
+  "items": [
+    {"name": "WEDDING RING", "quantity": 1, "amount": 550000},
+    {"name": "PLAYSTATION 5", "quantity": 1, "amount": 450000}
+  ],
+  "tax_claimed": 105000,
+  "discount_claimed": 0,
+  "claimed_total": 1155000
+}
