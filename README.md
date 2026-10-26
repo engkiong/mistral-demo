@@ -62,7 +62,7 @@ the `.jpg`), `items` (`{name, quantity, amount}`), `tax_claimed`, `discount_clai
 | claim_h | r0015   | Wedding ring and PlayStation 5                   | reject               |
 | claim_i | r0016   | 10 cats, 200 baguettes for 17,000                | reject               |
 
-## Phase 1: one-shot chat (you are here: end)
+## Phase 1: one-shot chat (done)
 
 `naive_chat.py` is finished: it builds one prompt and prints the raw reply.
 
@@ -100,3 +100,34 @@ Run claim_b three times.
 The decision and the format change from run to run (approve, partial, reject, escalate).
 `mistral-medium-latest` often gets the arithmetic right. The problem is that the answer
 is not stable, and there is nothing to parse, test or retry. Phase 2 fixes that.
+
+## Phase 2: typed extraction and rules (you are here: start)
+
+Two ideas: the model only *reads* the receipt into typed fields, and plain code
+*decides*. Setup: run `pip install -r requirements.txt` again.
+
+Fill in these gaps (search for `TODO`):
+
+| File           | TODO                                                                  |
+| -------------- | --------------------------------------------------------------------- |
+| `extract.py`   | add the `payment_method` and `change` fields to the `Receipt` schema  |
+| `reconcile.py` | implement R2 (`check_tax_once`) and R4 (`check_escalation`)           |
+
+```bash
+python extract.py --receipt receipts/r0001.jpg   # one OCR call, typed JSON out
+python reconcile.py --all                        # extraction + rules over claims a to e
+```
+
+**You are done when:**
+
+1. `extract.py --receipt receipts/r0001.jpg` prints `"payment_method": "cash"` and
+   `"change": 6500`. Until then, `reconcile.py --all` prints a `!!` warning under each claim.
+2. `reconcile.py --all` prints **5/5 PASS**. Before the fix it is **3/5**: claim_b fails
+   (no R2) and claim_d fails (no R4, so it is not escalated).
+
+`reconcile.py --all` skips claim_f to claim_i. A rule cannot catch them. The model judge
+(R6) does, in phase 4.
+
+The rules: R1 the totals match. R2 tax is counted once. R3 discounts use the post-discount
+price. R4 escalate to a human when the receipt and claim do not match. R5 change and
+alcohol are not claimable.
