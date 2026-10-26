@@ -27,6 +27,16 @@ make a throwaway environment for each run:
 uv run --with-requirements requirements.txt check_key.py
 ```
 
+No Python and no uv? Install uv first. It then downloads Python 3.12 for you:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh      # macOS and Linux; open a new terminal after
+# Windows (PowerShell): powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+uv venv --python 3.12 && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+uv pip install -r requirements.txt
+cp .env.example .env    # put your Mistral API key in .env
+```
+
 ## Scripts
 
 ```bash
