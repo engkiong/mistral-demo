@@ -164,14 +164,14 @@ python run_workflow.py --claim claims/claim_c.json    # one execution, waits for
   Studio does not mark the failed attempt. The worker terminal does.
 - Manual step: confirm you can sign in to your Mistral Studio workspace.
 
-## Phase 4: a model judge and its evaluation (you are here: start)
+## Phase 4: a model judge and its evaluation (you are here: end)
 
 R6 is the one rule a model decides: it flags items that are not food or drink, and prices
 that are implausible for what was bought. The judge is in `anomaly.py`. It now runs in
 `reconcile.py` and in the workflow (`anomaly_activity`). Setup: run `pip install -r requirements.txt`
 again.
 
-Fill in this gap:
+This gap is filled in:
 
 | File         | TODO                                                                           |
 | ------------ | ------------------------------------------------------------------------------ |
@@ -188,14 +188,21 @@ python evaluate.py --reasoning-effort none        # try other settings
 python evaluate.py --model mistral-large-4
 ```
 
-**You are done when** `evaluate.py` catches all five anomalies and flags none of the four
+**Check it:** `evaluate.py` catches all five anomalies and flags none of the four
 clean claims (precision and recall both near 1.00). The starter prompt scores about precision
 0.71: it flags the clean receipt and the alcohol claim.
 
-Then run `reconcile.py --all`. It should print **9/9 PASS** or close to it. R6 is a model, so
-it is noisy: on a live run it sometimes flags a clean claim (claim_a or claim_c), and that claim
-then FAILs. Run each setting more than once before you compare. That noise is the lesson:
-a model can judge, but the decision stays in rules you can test.
+Then run `reconcile.py --all`. It should print **9/9 PASS** most of the time. A live run can
+still fail one claim: OCR may read an item name differently (so R4 escalates before R6 runs), or
+a call may time out. Run each setting more than once before you compare. A model can judge,
+but the decision stays in rules you can test.
+
+The finished prompt in `anomaly.py` is short. It treats every claim as a meal for one person or
+a group of up to 4, and flags three things: an item that is not food or drink, more than 4
+people served, and a price that is not reasonable per person (about 10 times off, with a normal
+range in IDR). A vaguer prompt flagged clean claims (cheap fried mushrooms, a 61,000 coffee).
+Giving the normal range and the "10 times" rule fixed that. The 40-guest dinner is caught by
+the group-size rule.
 
 Five claims are anomalies: claim_f to claim_i, and claim_d (a CORD receipt for reusable lunch
 boxes). R4 runs before R6, so claim_d is escalated, with the anomaly in its reasons.

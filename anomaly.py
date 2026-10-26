@@ -11,17 +11,22 @@ from pydantic import BaseModel, Field
 from common import get_client, load_claim
 from extract import extract_receipt
 
+# Chosen with evaluate.py: without reasoning, Medium 3.5 misses the 40-guest dinner for 40,000;
+# Large 4 flags the clean receipt r0001 and can take over a minute.
 ANOMALY_MODEL = "mistral-medium-3-5"
 REASONING_EFFORT = "high"
 
-# TODO: write the instructions. Say what IS an anomaly (what must the items and prices of a
-#       business meal look like?) and what is NOT (other rules already handle alcohol, tax and
-#       service charges, discounts, change, arithmetic errors, and blurred receipt details).
-#       Ask for one short reason per anomalous item, and no reasons if nothing is anomalous.
-#       Then run `python evaluate.py` and improve the prompt until it scores well.
 INSTRUCTIONS = """\
-You audit expense claims. Every claim is for a business meal. Read the receipt text and
-say whether the claim is anomalous."""
+You audit expense claims. Every claim is for a business meal for one person or a small group of
+up to 4 people. Read the receipt text and flag the claim as anomalous only if one of these is true:
+- an item is not food or drink (for example goods, services, animals or equipment);
+- the number of people served is more than 4;
+- the price of an item does not sound reasonable per person: far too cheap or far too
+  expensive, about 10 times off. Judge it in the claim's currency. In IDR, one dish or drink
+  from 5,000 to 200,000 is normal. '.' and ',' inside an amount are thousands separators.
+These are NOT anomalies, because other rules handle them: alcohol, tax or service charges,
+discounts, change, arithmetic errors, the time of day, and blurred or missing receipt details.
+Give one short reason per anomalous item, naming the item. Give no reasons if nothing is anomalous."""
 
 
 class AnomalyVerdict(BaseModel):
