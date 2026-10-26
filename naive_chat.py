@@ -11,9 +11,13 @@ CHAT_MODEL = "mistral-medium-latest"
 
 
 def build_prompt(claim: Claim, receipt_text: str) -> str:
-    # TODO: write one prompt that tells the model to act as an expense auditor, gives it the
-    #       claim (as JSON) and the receipt text, and asks for one of DECISION_LABELS.
-    raise NotImplementedError("write the prompt")
+    return (
+        "You are an expense auditor. Reconcile the expense claim below against the "
+        "receipt text and decide whether to reimburse it.\n"
+        f"Decision options: {', '.join(DECISION_LABELS)}.\n\n"
+        f"CLAIM (JSON):\n{json.dumps(claim, indent=2)}\n\n"
+        f"RECEIPT (OCR text):\n{receipt_text}"
+    )
 
 
 def main() -> None:
@@ -23,9 +27,14 @@ def main() -> None:
 
     claim = load_claim(args.claim)
     receipt_text = load_receipt_text(Path(claim["receipt"]).with_suffix(".txt"))
-    # TODO: send build_prompt(claim, receipt_text) with get_client().chat.complete(...) and print
-    #       the reply. Keep it simple: no parsing, no tools, no temperature setting.
-    raise NotImplementedError("call the chat model")
+    # No parsing, no tools, no temperature override: sampling stays on on purpose.
+    resp = get_client().chat.complete(
+        model=CHAT_MODEL,
+        messages=[UserMessage(content=build_prompt(claim, receipt_text))],
+    )
+    message = resp.choices[0].message
+    assert message is not None
+    print(message.content)
 
 
 if __name__ == "__main__":

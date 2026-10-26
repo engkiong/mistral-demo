@@ -62,9 +62,9 @@ the `.jpg`), `items` (`{name, quantity, amount}`), `tax_claimed`, `discount_clai
 | claim_h | r0015   | Wedding ring and PlayStation 5                   | reject               |
 | claim_i | r0016   | 10 cats, 200 baguettes for 17,000                | reject               |
 
-## Phase 1: one-shot chat (you are here: start)
+## Phase 1: one-shot chat (you are here: end)
 
-Fill in the two TODOs in `naive_chat.py`: write the prompt, then call the chat model.
+`naive_chat.py` is finished: it builds one prompt and prints the raw reply.
 
 **What the prompt must do.** Act as an expense auditor and give one decision from
 `DECISION_LABELS`. Apply these five rules (phase 2 turns them into code):
@@ -96,7 +96,7 @@ python naive_chat.py --claim claims/claim_a.json
 python naive_chat.py --claim claims/claim_b.json   # run it a few times
 ```
 
-**You are done when** the model prints an answer for a claim. Run claim_b three times.
+Run claim_b three times.
 The decision and the format change from run to run (approve, partial, reject, escalate).
 `mistral-medium-latest` often gets the arithmetic right. The problem is that the answer
 is not stable, and there is nothing to parse, test or retry. Phase 2 fixes that.
